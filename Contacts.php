@@ -331,9 +331,26 @@ class Contacts extends DotMailer {
 	 * @throws UnknownErrorException Unknown error
 	 * @link http://www.dotmailer.co.uk/api/contacts/update_contact.aspx
 	 */
-	public function updateContact($contact) {
+	public function updateContact(
+		$email,
+		$dataFields = null,
+		$audienceType = "B2C",
+		$optInType = "Single",
+		$emailType = "Html",
+		$notes = null
+		) {
+
+		$contact = new DotMailerEntity();
+		$contact->ID = -1;
+		$contact->Email = $email;
+		$contact->AudienceType = $audienceType;
+		$contact->DataFields = $dataFields;
+		$contact->OptInType = $optInType;
+		$contact->EmailType = $emailType;
+		$contact->Notes = $notes;
+
 		$params = array();
-		$params["contact"] = $contact;
+		$params["contact"] = $contact->toArrayWithSoapVars();
 		return $this->send("updateContact", $params);
 	}
 }

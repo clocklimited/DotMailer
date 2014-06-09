@@ -291,8 +291,12 @@ class AddressBooks extends DotMailer {
 	 * @throws UnknownException
 	 *
 	 */
-	public function removeContactFromAddressBook($addressbookID, $preventAddressbookResubscribe, $totalUnsubscribe) {
+	public function removeContactFromAddressBook($email, $addressbookID, $preventAddressbookResubscribe, $totalUnsubscribe) {
+		$contact = new DotMailerEntity();
+		$contact->Email = $email;
+
 		$params = array();
+		$params["contact"] = $contact->toArrayWithSoapVars();
 		$params["addressbookID"] = $addressbookID;
 		$params["preventAddressbookResubscribe"] = $preventAddressbookResubscribe;
 		$params["totalUnsubscribe"] = $totalUnsubscribe;
