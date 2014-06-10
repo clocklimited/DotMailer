@@ -1,5 +1,7 @@
 <?php
 require_once("DotMailer.php");
+require_once("DotMailerEntity.php");
+
 /**
 * Contacts Class is a DotMailer wrapper that contains all the method that are
 * related to the DotMailer contact object.
