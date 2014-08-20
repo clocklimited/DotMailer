@@ -2,9 +2,9 @@
 /**
 * DotMailer PHP Wrapper
 *
-* @version 1.0
-* @author Clock Ltd
-* @copyright Clock Limited 2012
+* @version 2.0
+* @author James Mortemore
+* @copyright Clock Limited 2014
 * @license http://opensource.org/licenses/bsd-license.php New BSD License
 */
 class DotMailer {
@@ -12,6 +12,7 @@ class DotMailer {
 	protected $dotMailerClient;
 
 	protected $mockingException;
+	protected $options;
 
 	protected $exceptionMap = array(
 		"ERROR_ADDRESSBOOK_DUPLICATE" 								=> "AddressBookDuplicateException",
@@ -51,7 +52,11 @@ class DotMailer {
 			$options = array_merge($moreOptions, $options);
 		}
 		$this->dotMailerClient = $client;
-		$this->soapClient = new \SoapClient($client->getWsdl(), $options);
+		$loginOptions = array('login' => $client->getUsername(), 'password' => $client->getPassword());
+
+		$this->options = array_merge($loginOptions, $options);
+
+		$this->soapClient = new \SoapClient($client->getWsdl(), $this->options);
 
 		$this->logger = $logger;
 	}
@@ -59,6 +64,12 @@ class DotMailer {
 	public function setAccountDetails($username, $password) {
 		$this->dotMailerClient->setUsername($username);
 		$this->dotMailerClient->setPassword($password);
+
+		$loginOptions = array('login' => $username, 'password' => $password);
+
+		$this->options = array_merge($this->options, $loginOptions);
+
+		$this->soapClient = new \SoapClient($this->dotMailerClient->getWsdl(), $this->options);
 	}
 
 	/**
@@ -94,12 +105,12 @@ class DotMailer {
 	 * @throws UnknownException
 	 */
 	protected function send($methodName, array $params) {
+        // @todo: remove from here and handle in tests
 		if (!empty($this->mockingException)) {
 			$exceptionClass = $this->mockingException;
 			throw new $exceptionClass("Mock Exception");
 		}
-		$params["username"] = $this->dotMailerClient->getUsername();
-		$params["password"] = $this->dotMailerClient->getPassword();
+
 		try {
 			$response = $this->doRequest($methodName, $params);
 			if ($this->logger) {
@@ -132,7 +143,7 @@ class DotMailer {
 		$message = trim(substr($exception, strpos($exception, "---> ") + 5));
 		if (isset($this->exceptionMap[$exceptionName])) {
 			$exceptionClass = $this->exceptionMap[$exceptionName];
-			require_once("Exception/$exceptionClass.php");
+			require_once("Exception/{$exceptionClass}.php");
 			throw new $exceptionClass($message);
 		} else {
 			require_once("Exception/UnknownException.php");

@@ -24,16 +24,31 @@ class DotMailerEntity {
 	 * in the DataFields with SoapVars instead of default data types
 	 */
 	public function toArrayWithSoapVars() {
-		if (isset($this->parameters["DataFields"]["Values"])) {
-			foreach ($this->parameters["DataFields"]["Values"] as &$value) {
-				if (is_string($value)) {
-					$value = new SoapVar($value, XSD_STRING, "string", "http://www.w3.org/2001/XMLSchema");
-				} elseif (is_int($value)) {
-					$value = new SoapVar(strval($value), XSD_STRING, "string", "http://www.w3.org/2001/XMLSchema");
-				}
+		$params = $this->parameters;
+		if (isset($params['DataFields'])) {
+			unset($params['DateFields']);
+		}
+
+		$dataFields = array();
+		foreach ($this->parameters["DataFields"] as $key => $value) {
+			if (is_string($value)) {
+				$soapValue = new SoapVar($value, XSD_STRING, "string", "http://www.w3.org/2001/XMLSchema");
+			} else if (is_int($value)) {
+				$soapValue = new SoapVar(strval($value), XSD_STRING, "string", "http://www.w3.org/2001/XMLSchema");
+			}
+
+			if ($soapValue) {
+				$dataFields[] = array(
+					'Key' => $key,
+					'Value' => $soapValue
+				);
 			}
 		}
-		return $this->parameters;
+
+		if (!empty($dataFields)) {
+			$params['DataFields'] =  $dataFields;
+		}
+		return $params;
 	}
 
 	public function __toXml() {
