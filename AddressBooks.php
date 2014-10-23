@@ -21,8 +21,6 @@ class AddressBooks extends DotMailer {
 	 * @param string $audienceType
 	 * @param string $optInType
 	 * @param string $emailType
-	 * @internal param string $contact
-	 * @internal param int $addressbookID
 	 * @return string $contact
 	 */
 	public function addContactToAddressBook(
@@ -46,5 +44,13 @@ class AddressBooks extends DotMailer {
 		$params["apiContact"] = $contact->toArrayWithSoapVars();
 		$params["addressBookId"] = $addressbookId;
 		return $this->send("addContactToAddressBook", $params);
+	}
+
+	public function contactAlreadySubscribed($emailAddress) {
+		$params["email"] = $emailAddress;
+		$response = $this->send("getContactByEmail", $params);
+
+		return is_object($response) && isset($response->GetContactByEmailResult)
+			&& isset($response->GetContactByEmailResult->Email);
 	}
 }
