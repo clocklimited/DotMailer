@@ -48,9 +48,14 @@ class AddressBooks extends DotMailer {
 
 	public function contactAlreadySubscribed($emailAddress) {
 		$params["email"] = $emailAddress;
-		$response = $this->send("getContactByEmail", $params);
 
-		return is_object($response) && isset($response->GetContactByEmailResult)
+		try {
+			$response = $this->send("getContactByEmail", $params);
+
+			return is_object($response) && isset($response->GetContactByEmailResult)
 			&& isset($response->GetContactByEmailResult->Email);
+		} catch (ContactNotFoundException $e) {
+			return false;
+		}
 	}
 }
